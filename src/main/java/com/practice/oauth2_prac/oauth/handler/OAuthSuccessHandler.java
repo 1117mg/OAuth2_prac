@@ -1,8 +1,8 @@
 package com.practice.oauth2_prac.oauth.handler;
 
 import com.practice.oauth2_prac.global.jwt.JwtTokenProvider;
+import com.practice.oauth2_prac.global.jwt.RefreshTokenService;
 import com.practice.oauth2_prac.user.repository.UserRepository;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +18,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -34,11 +35,15 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         var user = userRepository.findBySocialId(socialId).orElseThrow();
 
         String accessToken = jwtTokenProvider.generateToken(user.getId().toString());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId().toString());
+
+        long refreshExp = jwtTokenProvider.getExpiration(refreshToken).getTime() - System.currentTimeMillis();
+        refreshTokenService.save(user.getId(), refreshToken, refreshExp);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        response.getWriter().write("{\"accessToken\": \"" + accessToken + "\"}");
+        response.getWriter().write("{\"accessToken\": \"" + accessToken + "\", \"refreshToken\": \"" + refreshToken + "\"}");
         response.getWriter().flush();
     }
 }

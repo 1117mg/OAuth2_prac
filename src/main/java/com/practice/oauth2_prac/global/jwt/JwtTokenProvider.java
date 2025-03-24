@@ -18,6 +18,7 @@ public class JwtTokenProvider {
     private Key key;
 
     private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 30; // 30분
+    private static final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7일
 
     @PostConstruct
     public void init() {
@@ -30,6 +31,10 @@ public class JwtTokenProvider {
 
     public String generateToken(String userId) {
         return createToken(userId, ACCESS_TOKEN_EXPIRATION);
+    }
+
+    public String generateRefreshToken(String userId) {
+        return createToken(userId, REFRESH_TOKEN_EXPIRATION);
     }
 
     private String createToken(String userId, long expiration) {
@@ -57,5 +62,12 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public Date getExpiration(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
     }
 }

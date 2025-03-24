@@ -13,16 +13,17 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
-
+  data:
+    redis:
+      host: localhost
+      port: 6379
   h2:
     console:
       enabled: true
       path: /h2
-
   jpa:
     hibernate:
       ddl-auto: update
-
   security:
     oauth2:
       client:
@@ -42,7 +43,6 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
-
   devtools:
     restart:
       enabled: true   # 자동 재시작 활성화
